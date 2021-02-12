@@ -82,8 +82,8 @@ Private Sub ExpandIfNeeded(ByVal IncreaseSize)
    End If
 End Sub
 
-Private Function Max(ByVal x As Long, ByVal Y As Long) As Long
-    Max = IIf(x > Y, x, Y)
+Private Function Max(ByVal x As Long, ByVal y As Long) As Long
+    Max = IIf(x > y, x, y)
 End Function
 
 Public Sub Clear()
