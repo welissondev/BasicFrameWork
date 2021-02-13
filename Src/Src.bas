@@ -142,11 +142,13 @@ On Error GoTo ErrorFail
     Dim Component As VBIDE.VBComponent
     Dim FileName As Variant
     Dim RootFolder, BaseName, Extension As String
-    Dim IgnoredList As Object
+    Dim SrcList, IgnoredList As Object
     
+    Let RootFolder = ThisWorkbook.Path & "\Src\"
     Set Project = ThisWorkbook.VBProject.VBComponents
     Set IgnoredList = GetIgnoredComponentNames()
-    
+    Set SrcList = GetSrcComponentNames()
+
     '//Remove componentes atuais
     For Each Component In Project
         
@@ -165,10 +167,7 @@ On Error GoTo ErrorFail
     '//Importa componentes
     With New FileSystemObject
         
-        Let RootFolder = ThisWorkbook.Path & "\Src\"
-        Set IgnoredList = GetSrcComponentNames()
-        
-        For Each FileName In IgnoredList
+        For Each FileName In SrcList
             
             BaseName = .GetBaseName(FileName)
             Extension = "." & .GetExtensionName(FileName)
