@@ -17,36 +17,44 @@ Attribute VB_Name = "Src"
 '* É necessário habilitar o modo de segurança do excel em: <Arquivo\Opções\Central de confiabilidade
 '* configurações da central de confiabilidade\Configuração do actviX\Modo de segurança>. Isso é
 '* necessário, caso contrário não ira funcionar. É importante lembrar que essas configurações são
-'* apenas para desenvolverdores, já mais devem ser aplicadas no abiente do cliente.
+'* apenas para desenvolverdores, já mais devem ser aplicadas no abiente de produção.
 '*
 '*/
 
 Option Explicit
 Option Private Module
 
+Enum CmdImmediate
+    PrintLS = 1
+End Enum
+
 '//Cria diretórios
 Sub Init()
 On Error GoTo ErrorFail
 
-    Dim List As Object
+    Dim NameList As Object
     Dim RootFolder As String
     Dim Directory As Variant
     
     Let RootFolder = ThisWorkbook.Path
-    Set List = CreateObject("System.Collections.ArrayList")
+    Set NameList = CreateObject("System.Collections.ArrayList")
     
-    With List
+    With NameList
         .Add RootFolder & "\Src"
         .Add RootFolder & "\Def"
     End With
     
     With New FileSystemObject
-        For Each Directory In List
-            If Not .FolderExists(Directory) Then Call .CreateFolder(Directory): Debug.Print "Created directory -> "; Directory
+    
+        For Each Directory In NameList
+            If Not .FolderExists(Directory) Then
+                .CreateFolder (Directory): Debug.Print "Created directory -> "; Directory
+            End If
         Next
+    
     End With
     
-    Set List = Nothing
+    Set NameList = Nothing
     
 ErrorExit:
     Debug.Print ""
@@ -58,24 +66,24 @@ ErrorFail:
 End Sub
 
 '//Ignora componentes
-Sub Ignore(ParamArray Components() As Variant)
+Sub Ignore(ParamArray ComponentNames() As Variant)
 On Error GoTo ErrorFail
     
     Dim RootFolder As String
-    Dim File As TextStream
-    Dim Name As Variant
+    Dim Stream As TextStream
+    Dim Arg As Variant
     
     Let RootFolder = ThisWorkbook.Path & "\Def"
     
     With New FileSystemObject
         
-        Set File = .OpenTextFile(RootFolder & "\Ignoreds.config", ForAppending, True)
+        Set Stream = .OpenTextFile(RootFolder & "\Ignoreds.config", ForAppending, True)
         
-        For Each Name In Components
-             File.WriteLine Name
+        For Each Arg In ComponentNames
+             Stream.WriteLine Arg
         Next
         
-        File.Close
+        Stream.Close
          
     End With
 
@@ -88,22 +96,22 @@ ErrorFail:
     
 End Sub
 
-'//Exporta componentes
+'//Empurra componentes
 Sub Push()
 On Error GoTo ErrorFail
     
     Dim Project As VBIDE.VBComponents
     Dim Component As VBIDE.VBComponent
     Dim RootFolder As String
-    Dim List As Object
+    Dim NameList As Object
     
     Set Project = ThisWorkbook.VBProject.VBComponents
     Let RootFolder = ThisWorkbook.Path & "\Src\"
-    Set List = GetIgnoredList()
+    Set NameList = GetIgnoredComponentNames()
     
     For Each Component In Project
         
-        If Not List.Contains(Component.Name) Then
+        If Not NameList.Contains(Component.Name) Then
             
             Select Case ExtensionType(Component)
                 Case Is = ".cls": Component.Export RootFolder & Component.Name & ".cls"
@@ -126,7 +134,7 @@ ErrorFail:
     
 End Sub
 
-'\\Importa componentes
+'\\Puxa componentes
 Sub Pull()
 On Error GoTo ErrorFail
     
@@ -134,11 +142,10 @@ On Error GoTo ErrorFail
     Dim Component As VBIDE.VBComponent
     Dim FileName As Variant
     Dim RootFolder, BaseName, Extension As String
-    Dim FileList, IgnoredList As Object
+    Dim IgnoredList As Object
     
     Set Project = ThisWorkbook.VBProject.VBComponents
-    Set FileList = GetSrcFileList()
-    Set IgnoredList = GetIgnoredList()
+    Set IgnoredList = GetIgnoredComponentNames()
     
     '//Remove componentes atuais
     For Each Component In Project
@@ -159,8 +166,9 @@ On Error GoTo ErrorFail
     With New FileSystemObject
         
         Let RootFolder = ThisWorkbook.Path & "\Src\"
+        Set IgnoredList = GetSrcComponentNames()
         
-        For Each FileName In FileList
+        For Each FileName In IgnoredList
             
             BaseName = .GetBaseName(FileName)
             Extension = "." & .GetExtensionName(FileName)
@@ -192,29 +200,29 @@ End Sub
 
 
 '//Atualiza diretório src
-Sub Refresh()
+Sub Rebase()
 On Error GoTo ErrorFail
 
-    Dim SrcFileList, VbaFileList, IgnoredList As Object
+    Dim SrcList, VbaList, IgnoredList As Object
     Dim FileName, BaseName, Extension As Variant
     Dim RootFolder As String
 
-    Set SrcFileList = GetSrcFileList()
-    Set VbaFileList = GetVbaFileList()
-    Set IgnoredList = GetIgnoredList()
+    Set SrcList = GetSrcComponentNames()
+    Set VbaList = GetVbaComponentNames()
+    Set IgnoredList = GetIgnoredComponentNames()
     
     Let RootFolder = ThisWorkbook.Path & "\Src\"
     
+    '//Remove todos os arquivos do src que não estão no projeto, ou
+    '//que foram ignorados pelo usuário
     With New FileSystemObject
         
-        '//Remove todos os arquivos do src que não estão no projeto, ou
-        '//que foram ignorados pelo usuário
-        For Each FileName In SrcFileList
+        For Each FileName In SrcList
             
-            If Not VbaFileList.Contains(FileName) Or IgnoredList.Contains(.GetBaseName(FileName)) = True Then
-                
-                Let BaseName = .GetBaseName(FileName)
-                Let Extension = "." & .GetExtensionName(FileName)
+            Let BaseName = .GetBaseName(FileName)
+            Let Extension = "." & .GetExtensionName(FileName)
+            
+            If Not VbaList.Contains(FileName) Or IgnoredList.Contains(BaseName) = True Then
                 
                 Select Case Extension
                     Case Is = ".cls"
@@ -222,8 +230,7 @@ On Error GoTo ErrorFail
                     Case Is = ".bas"
                         .DeleteFile (RootFolder & FileName)
                     Case Is = ".frm"
-                        .DeleteFile (RootFolder & FileName)
-                        .DeleteFile (RootFolder & BaseName & ".frx")
+                        .DeleteFile (RootFolder & FileName): .DeleteFile (RootFolder & BaseName & ".frx")
                 End Select
                 
             End If
@@ -235,6 +242,7 @@ On Error GoTo ErrorFail
     End With
     
 ErrorExit:
+    Debug.Print
     Exit Sub
     
 ErrorFail:
@@ -242,28 +250,27 @@ ErrorFail:
     
 End Sub
 
-
 '//Retorna <ArrayList> com nomes dos componentes do src
-Function GetSrcFileList(Optional ViewImmediateWindows As Boolean = False) As Object
+Function GetSrcComponentNames(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
         
-    Dim FileList, RootFolder As Object
+    Dim NameList, RootFolder As Object
     Dim FileName, Extesion As Variant
 
-    Set FileList = CreateObject("System.Collections.ArrayList")
+    Set NameList = CreateObject("System.Collections.ArrayList")
     
     With New FileSystemObject
-        
+            
         Set RootFolder = .GetFolder(ThisWorkbook.Path & "\Src\")
-        
+            
         For Each FileName In RootFolder.Files
             
             FileName = .GetFileName(FileName)
             
             Select Case .GetExtensionName(FileName)
-                Case Is = "cls": FileList.Add FileName
-                Case Is = "bas": FileList.Add FileName
-                Case Is = "frm": FileList.Add FileName
+                Case Is = "cls": NameList.Add FileName
+                Case Is = "bas": NameList.Add FileName
+                Case Is = "frm": NameList.Add FileName
             End Select
             
             DoEvents
@@ -272,21 +279,23 @@ On Error GoTo ErrorFail
         
     End With
     
-    If ViewImmediateWindows = True Then
+    Call NameList.Sort
+    
+    If ImmeView = 1 Then
         Debug.Print ""
-        Debug.Print "   Src Directory: " & RootFolder
-        Debug.Print "   " & FileList.Count; " files found in the branch"
+        Debug.Print "   Src Directory: " & ThisWorkbook.Path & "\Src"
+        Debug.Print "   " & NameList.Count; " files found in the branch"
         Debug.Print ""
-        For Each FileName In FileList
+        For Each FileName In NameList
             Debug.Print "   -> "; FileName
             DoEvents
         Next
+        Debug.Print ""
     End If
-    
-    Set GetSrcFileList = FileList
+       
+    Set GetSrcComponentNames = NameList
     
 ErrorExit:
-    Debug.Print ""
     Exit Function
     
 ErrorFail:
@@ -295,44 +304,46 @@ ErrorFail:
 End Function
 
 '//Retorna <ArrayList> com nomes dos componentes do projeto
-Function GetVbaFileList(Optional ViewImmediateWindows As Boolean = False) As Object
+Function GetVbaComponentNames(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
-
-    Dim Component As VBComponent
+    
     Dim Project As VBComponents
-    Dim FileList As Object
+    Dim Component As VBComponent
+    Dim NameList As Object
     Dim FileName As Variant
     
     Set Project = ThisWorkbook.VBProject.VBComponents
-    Set FileList = CreateObject("System.Collections.ArrayList")
+    Set NameList = CreateObject("System.Collections.ArrayList")
     
     For Each Component In Project
         
         Select Case ExtensionType(Component)
-            Case Is = ".cls": FileList.Add Component.Name & ".cls"
-            Case Is = ".bas": FileList.Add Component.Name & ".bas"
-            Case Is = ".frm": FileList.Add Component.Name & ".frm"
+            Case Is = ".cls": NameList.Add Component.Name & ".cls"
+            Case Is = ".bas": NameList.Add Component.Name & ".bas"
+            Case Is = ".frm": NameList.Add Component.Name & ".frm"
         End Select
         
         DoEvents
         
     Next
     
-    If ViewImmediateWindows = True Then
+    Call NameList.Sort
+    
+    If ImmeView = 1 Then
         Debug.Print ""
-        Debug.Print "   ThisWorkbook: "; ThisWorkbook.VBProject.Name
-        Debug.Print "   " & FileList.Count; " files found in the project"
+        Debug.Print "   ThisWorkbook: "; ThisWorkbook.VBProject.Name & " (" & ThisWorkbook.Name & ")"
+        Debug.Print "   " & NameList.Count; " files found in the project"
         Debug.Print ""
-        For Each FileName In FileList
+        For Each FileName In NameList
             Debug.Print "   -> "; FileName
             DoEvents
         Next
+        Debug.Print ""
     End If
 
-    Set GetVbaFileList = FileList
+    Set GetVbaComponentNames = NameList
 
 ErrorExit:
-    Debug.Print ""
     Exit Function
     
 ErrorFail:
@@ -340,15 +351,15 @@ ErrorFail:
 
 End Function
 
-Function GetIgnoredList(Optional ViewImmediateWindows As Boolean = False) As Object
+Function GetIgnoredComponentNames(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
 
     Dim Path As String
     Dim Stream As TextStream
     Dim FileName As Variant
-    Dim ArrayList As Object
+    Dim IgnoredList As Object
     
-    Set ArrayList = CreateObject("System.Collections.ArrayList")
+    Set IgnoredList = CreateObject("System.Collections.ArrayList")
     Let Path = ThisWorkbook.Path & "\Def\Ignoreds.config"
     
     With New FileSystemObject
@@ -358,27 +369,29 @@ On Error GoTo ErrorFail
         While Not Stream.AtEndOfLine
             
             Let FileName = Stream.ReadLine
-            ArrayList.Add FileName
+            IgnoredList.Add FileName
             
         Wend
         
     End With
     
-    If ViewImmediateWindows = True Then
+    Call IgnoredList.Sort
+    
+    If ImmeView = 1 Then
         Debug.Print ""
         Debug.Print "   Ignored.Config: "; Path
-        Debug.Print "   " & ArrayList.Count; " ignored files"
+        Debug.Print "   " & IgnoredList.Count; " ignored files"
         Debug.Print ""
-        For Each FileName In ArrayList
+        For Each FileName In IgnoredList
             Debug.Print "   -> "; FileName
             DoEvents
         Next
+        Debug.Print ""
     End If
     
-    Set GetIgnoredList = ArrayList
+    Set GetIgnoredComponentNames = IgnoredList
 
 ErrorExit:
-    Debug.Print ""
     Exit Function
 
 ErrorFail:
@@ -397,4 +410,3 @@ Private Property Get ExtensionType(Component As VBIDE.VBComponent) As String
             ExtensionType = ".frm"
     End Select
 End Property
-
