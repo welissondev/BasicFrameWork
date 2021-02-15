@@ -1,4 +1,4 @@
-Attribute VB_Name = "VBAExport"
+Attribute VB_Name = "SrcExport"
 '/*
 '* *************************************************************************************
 '* Site: www.diarioexcel.com.br
