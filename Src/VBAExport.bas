@@ -1,4 +1,4 @@
-Attribute VB_Name = "Src"
+Attribute VB_Name = "VBAExport"
 '/*
 '* *************************************************************************************
 '* Site: www.diarioexcel.com.br
@@ -107,7 +107,7 @@ On Error GoTo ErrorFail
     
     Set Project = ThisWorkbook.VBProject.VBComponents
     Let RootFolder = ThisWorkbook.Path & "\Src\"
-    Set NameList = GetIgnoredComponentNames()
+    Set NameList = GetIgnoreds()
     
     For Each Component In Project
         
@@ -146,8 +146,8 @@ On Error GoTo ErrorFail
     
     Let RootFolder = ThisWorkbook.Path & "\Src\"
     Set Project = ThisWorkbook.VBProject.VBComponents
-    Set IgnoredList = GetIgnoredComponentNames()
-    Set SrcList = GetSrcComponentNames()
+    Set IgnoredList = GetIgnoreds()
+    Set SrcList = GetSrcFiles()
 
     '//Remove componentes atuais
     For Each Component In Project
@@ -206,9 +206,9 @@ On Error GoTo ErrorFail
     Dim FileName, BaseName, Extension As Variant
     Dim RootFolder As String
 
-    Set SrcList = GetSrcComponentNames()
-    Set VbaList = GetVbaComponentNames()
-    Set IgnoredList = GetIgnoredComponentNames()
+    Set SrcList = GetSrcFiles()
+    Set VbaList = GetVbaFiles()
+    Set IgnoredList = GetIgnoreds()
     
     Let RootFolder = ThisWorkbook.Path & "\Src\"
     
@@ -250,7 +250,7 @@ ErrorFail:
 End Sub
 
 '//Retorna <ArrayList> com nomes dos componentes do src
-Function GetSrcComponentNames(Optional ImmeView As CmdImmediate = 0) As Object
+Function GetSrcFiles(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
         
     Dim NameList, RootFolder As Object
@@ -292,7 +292,7 @@ On Error GoTo ErrorFail
         Debug.Print ""
     End If
        
-    Set GetSrcComponentNames = NameList
+    Set GetSrcFiles = NameList
     
 ErrorExit:
     Exit Function
@@ -303,7 +303,7 @@ ErrorFail:
 End Function
 
 '//Retorna <ArrayList> com nomes dos componentes do projeto
-Function GetVbaComponentNames(Optional ImmeView As CmdImmediate = 0) As Object
+Function GetVbaFiles(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
     
     Dim Project As VBComponents
@@ -340,7 +340,7 @@ On Error GoTo ErrorFail
         Debug.Print ""
     End If
 
-    Set GetVbaComponentNames = NameList
+    Set GetVbaFiles = NameList
 
 ErrorExit:
     Exit Function
@@ -350,7 +350,8 @@ ErrorFail:
 
 End Function
 
-Function GetIgnoredComponentNames(Optional ImmeView As CmdImmediate = 0) As Object
+'//Retorna uma <ArrayList> com os nomes dos componentes ignorados
+Function GetIgnoreds(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
 
     Dim Path As String
@@ -388,7 +389,7 @@ On Error GoTo ErrorFail
         Debug.Print ""
     End If
     
-    Set GetIgnoredComponentNames = IgnoredList
+    Set GetIgnoreds = IgnoredList
 
 ErrorExit:
     Exit Function
