@@ -1,4 +1,4 @@
-Attribute VB_Name = "SrcExport"
+Attribute VB_Name = "SrcContext"
 '/*
 '* *************************************************************************************
 '* Site: www.diarioexcel.com.br
@@ -252,7 +252,7 @@ End Sub
 '//Retorna <ArrayList> com nomes dos componentes do src
 Function GetSrcFiles(Optional ImmeView As CmdImmediate = 0) As Object
 On Error GoTo ErrorFail
-        
+
     Dim NameList, RootFolder As Object
     Dim FileName, Extesion As Variant
 
