@@ -49,6 +49,37 @@ Exception:
 
 End Function
 
+Public Function ExecuteReader(ByVal SqlCommand As String) As ADODB.RecordSet
+    
+    Command.ActiveConnection = Begin
+    Command.CommandType = adCmdText
+    Command.CommandText = SqlCommand
+      
+    Set RecordSet = Command.Execute
+    Set ExecuteReader = RecordSet
+    
+    ClearParameter
+    Sql.Clear
+    
+End Function
+
+Public Function ExecuteScalar(ByVal SqlCommand As String) As Variant
+    
+    Command.ActiveConnection = Connection
+    Command.CommandType = adCmdText
+    Command.CommandText = SqlCommand
+      
+    Set RecordSet = Command.Execute()
+    
+    If RecordSet.EOF = False Then
+        Let ExecuteScalar = RecordSet.Fields(0).Value
+    End If
+  
+    ClearParameter
+    Sql.Clear
+    
+End Function
+
 Public Function ExecuteNonQuery(ByVal CommandSql As String) As Boolean
     
     Dim RecordsAffected As Integer
@@ -80,23 +111,6 @@ End Function
 Public Sub RollbackTrans()
     Connection.RollbackTrans
 End Sub
-
-Public Function ExecuteScalar(ByVal SqlCommand As String) As Variant
-    
-    Command.ActiveConnection = Connection
-    Command.CommandType = adCmdText
-    Command.CommandText = SqlCommand
-      
-    Set RecordSet = Command.Execute()
-    
-    If RecordSet.EOF = False Then
-        Let ExecuteScalar = RecordSet.Fields(0).Value
-    End If
-  
-    ClearParameter
-    Sql.Clear
-    
-End Function
 
 Public Sub AddParameter(ByVal Name As String, Value As Variant, Optional DataType As DataTypeEnum = adEmpty, Optional ParameterDirection As ParameterDirectionEnum = adParamInput, Optional Size As Integer = 255)
     Command.Parameters.Append Command.CreateParameter(Name, DataType, ParameterDirection, Size, Value)
