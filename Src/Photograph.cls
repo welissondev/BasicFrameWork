@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder("Frabasic")
 Option Explicit
 
 Public FileString As String
@@ -29,23 +30,37 @@ Public Sub LoadFile(ByVal Image As MSForms.Image, Optional ByVal Path As String 
     End Select
 End Sub
 
-Public Sub CopyFile(ByVal Sourc As String, ByVal dest As String, Optional ByVal OverWiriteFile = True)
-    If VerifyDirectoryFile(Sourc) = True Then
-        With New FileSystemObject
-            Call .CopyFile(Sourc, dest, OverWiriteFile)
-        End With
-    End If
-End Sub
+Public Function CopyFile(ByVal Sourc As String, ByVal dest As String, Optional ByVal OverWiriteFile = True) As Boolean
+    On Error GoTo Exception
+    With New FileSystemObject
+        Call .CopyFile(Sourc, dest, OverWiriteFile)
+    End With
+Success:
+    CopyFile = True
+    Exit Function
+Exception:
+    CopyFile = False
+End Function
 
 Public Function DeleteFile(ByVal Path As String) As Boolean
-    If VerifyDirectoryFile(Path) = True Then
-        Call Kill(Path): DeleteFile = True
-    End If
+    On Error GoTo Exception
+    Call Kill(Path)
+Success:
+    DeleteFile = True
+    Exit Function
+Exception:
+    DeleteFile = False
 End Function
 
 Public Function VerifyDirectoryFile(ByVal Path As String) As Boolean
     With New FileSystemObject
         VerifyDirectoryFile = .FileExists(Path)
+    End With
+End Function
+
+Public Function GetFileName(Path As String) As String
+    With New FileSystemObject
+        GetFileName = .GetFileName(Path)
     End With
 End Function
 

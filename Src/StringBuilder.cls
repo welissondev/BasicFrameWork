@@ -7,82 +7,69 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder "Frabasic"
 Option Explicit
 Option Compare Binary
 
 Private Const DEFAULT_BLOCK_SIZE As Integer = 16
 
-Private Type Class
-   Buffer As String
-   Length As String
-End Type
+Private This As BuilderTypes
 
-Private This As Class
+Private Type BuilderTypes
+    Buffer As String
+    Length As String
+End Type
 
 Private Sub Class_Initialize()
     This.Buffer = VBA.String(DEFAULT_BLOCK_SIZE, " ")
     This.Length = 0
 End Sub
 
-Public Property Get Length() As Long
-    Length = This.Length
-End Property
-
-Public Property Get Capacity() As Long
-    Capacity = Len(This.Buffer)
-End Property
-
-Public Function Append(ByVal Value As Variant) As StringBuilder
+Public Function Append(ByVal Value As String) As StringBuilder
+    Dim ValueLength As Integer
    
-   Dim ValueLength As Long
+    ValueLength = Len(Value)
+    ExpandIfNeeded (ValueLength)
    
-   If Not IsNull(Value) Then
-   
-        ValueLength = Len(Value)
-        ExpandIfNeeded (ValueLength)
-        
-        Mid(This.Buffer, This.Length + 1) = Value
-        This.Length = This.Length + ValueLength
-        Set Append = Me
-        
-   End If
-   
+    Mid(This.Buffer, This.Length + 1) = Value
+    This.Length = This.Length + ValueLength
+    Set Append = Me
 End Function
 
-Public Function Insert(ByVal Index As Long, ByVal Value As String) As StringBuilder
-   Dim ValueLength As Long
-   Dim Rest As String
+Public Function Insert(ByVal Index As Integer, ByVal Value As String) As StringBuilder
+    Dim ValueLength As Integer
+    Dim Rest As String
    
-   If Index < 0 Then
-     Err.Raise 9
-   ElseIf This.Length < Index Then
-     Err.Raise 9
-   End If
+    If Index < 0 Then
+        Err.Raise 9
+    ElseIf This.Length < Index Then
+        Err.Raise 9
+    End If
      
-   ValueLength = Len(Value)
-   Call ExpandIfNeeded(ValueLength)
+    ValueLength = Len(Value)
+    Call ExpandIfNeeded(ValueLength)
 
-   Rest = Mid(This.Buffer, Index + 1)
-   Mid(This.Buffer, Index + 1) = Value
-   Mid(This.Buffer, Index + ValueLength + 1) = Rest
-   This.Length = This.Length + ValueLength
+    Rest = Mid(This.Buffer, Index + 1)
+    Mid(This.Buffer, Index + 1) = Value
+    Mid(This.Buffer, Index + ValueLength + 1) = Rest
+    This.Length = This.Length + ValueLength
    
-   Set Insert = Me
+    Set Insert = Me
 End Function
 
 Private Sub ExpandIfNeeded(ByVal IncreaseSize)
-   Dim NextLength As Long
-   Dim BlockSize As Long
+    Dim NextLength As Integer
+    Dim BlockSize As Integer
    
-   NextLength = This.Length + IncreaseSize
+    NextLength = This.Length + IncreaseSize
    
-   If Len(This.Buffer) < NextLength Then
-      BlockSize = Max(IncreaseSize, This.Length)
-      This.Buffer = This.Buffer + VBA.String(BlockSize, " ")
-   End If
+    If Len(This.Buffer) < NextLength Then
+        BlockSize = Max(IncreaseSize, This.Length)
+        This.Buffer = This.Buffer + VBA.String(BlockSize, " ")
+    End If
 End Sub
 
-Private Function Max(ByVal x As Long, ByVal y As Long) As Long
+Private Function Max(ByVal x As Integer, ByVal y As Integer) As Integer
     Max = IIf(x > y, x, y)
 End Function
 
@@ -105,6 +92,11 @@ Public Function ToString() As String
     ToString = Left(This.Buffer, This.Length)
 End Function
 
-Private Sub Class_Terminate()
-    Call Clear
-End Sub
+Public Property Get Length() As Integer
+    Length = This.Length
+End Property
+
+Public Property Get Capacity() As Integer
+    Capacity = Len(This.Buffer)
+End Property
+

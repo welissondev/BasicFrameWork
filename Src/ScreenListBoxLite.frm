@@ -1,17 +1,18 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} MainScreen 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} ScreenListBoxLite 
    Caption         =   "Main-Screen"
    ClientHeight    =   8715.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   17190
-   OleObjectBlob   =   "MainScreen.frx":0000
+   OleObjectBlob   =   "ScreenListBoxLite.frx":0000
 End
-Attribute VB_Name = "MainScreen"
+Attribute VB_Name = "ScreenListBoxLite"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'@Folder("Screen")
 
 Private ListBox As ListBoxLite
 
@@ -19,21 +20,21 @@ Private Sub ButtonFillListbox_Click()
     
     ListBox.Row.Clear
     
-    For i = 1 To TextBox1.Text
+    For I = 1 To TextBox1.Text
         With ListBox
             
             .Row.Add
-            .Row.Cell.Item(i, 0) = Sheet.Cells(i, "A").Text
-            .Row.Cell.Item(i, 1) = Sheet.Cells(i, "B").Text
-            .Row.Cell.Item(i, 2) = Sheet.Cells(i, "C").Text
-            .Row.Cell.Item(i, 3) = Sheet.Cells(i, "D").Text
-            .Row.Cell.Item(i, 4) = Sheet.Cells(i, "M").Text
-            .Row.Cell.Item(i, 5) = Sheet.Cells(i, "N").Text
-            .Row.Cell.Item(i, 6) = Sheet.Cells(i, "O").Text
-            .Row.Cell.Item(i, 7) = Sheet.Cells(i, "P").Text
-            .Row.Cell.Item(i, 8) = Sheet.Cells(i, "Q").Text
-            .Row.Cell.Item(i, 9) = Sheet.Cells(i, "R").Text
-            .Row.Cell.Item(i, 10) = Sheet.Cells(i, "S").Text
+            .Row.Cell.Item(I, 0) = Sheet.Cells(I, "A").Text
+            .Row.Cell.Item(I, 1) = Sheet.Cells(I, "B").Text
+            .Row.Cell.Item(I, 2) = Sheet.Cells(I, "C").Text
+            .Row.Cell.Item(I, 3) = Sheet.Cells(I, "D").Text
+            .Row.Cell.Item(I, 4) = Sheet.Cells(I, "M").Text
+            .Row.Cell.Item(I, 5) = Sheet.Cells(I, "N").Text
+            .Row.Cell.Item(I, 6) = Sheet.Cells(I, "O").Text
+            .Row.Cell.Item(I, 7) = Sheet.Cells(I, "P").Text
+            .Row.Cell.Item(I, 8) = Sheet.Cells(I, "Q").Text
+            .Row.Cell.Item(I, 9) = Sheet.Cells(I, "R").Text
+            .Row.Cell.Item(I, 10) = Sheet.Cells(I, "S").Text
             
         End With
         

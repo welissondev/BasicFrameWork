@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder "Frabasic"
 Option Explicit
 
 '/*
@@ -176,4 +177,5 @@ Private Sub Class_Terminate()
     Set Files = Nothing
     Set FileSystemObject = Nothing
 End Sub
+
 

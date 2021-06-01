@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder("Frabasic.Components.ListBoxLite")
+
 Option Explicit
 
 Private This As HandlerTypes
@@ -29,6 +31,4 @@ End Sub
 Public Property Set Handler(Value As ListBoxLiteHandler)
     Set This.Handler = Value
 End Property
-
-
 

@@ -7,37 +7,49 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder("Frabasic.DataAccess")
 Option Explicit
+
+Private Const IS_CONNECTED = 1
 
 Public Connection As ADODB.Connection
 Public RecordSet As ADODB.RecordSet
 Public Command As ADODB.Command
-Public SqlBuilder As StringBuilder
+Public Sql As StringBuilder
 
 Private Sub Class_Initialize()
     Set Connection = New ADODB.Connection
     Let Connection.CursorLocation = adUseClient
     Set Command = New ADODB.Command
     Set RecordSet = New ADODB.RecordSet
-    Set SqlBuilder = New StringBuilder
+    Set Sql = New StringBuilder
+End Sub
+
+Private Sub Class_Terminate()
+    Set Connection = Nothing
+    Set RecordSet = Nothing
+    Set Command = Nothing
+    Set Sql = Nothing
 End Sub
 
 Public Function Begin() As ADODB.Connection
     
-    With Connection
-        If .State = False Then
-           .Open AppProperty.ConnectionString
-           .BeginTrans
-        End If
-    End With
+    If Connection.State <> IS_CONNECTED Then
+        Connection.Open AppProperty.ConnectionString: Connection.BeginTrans
+    End If
     
     Set Begin = Connection
     
 End Function
 
-Public Sub Commit()
+Public Function Commit() As Boolean
+    On Error GoTo Exception
     Connection.CommitTrans
-End Sub
+    Commit = True
+    Exit Function
+Exception:
+    Commit = False
+End Function
 
 Public Function ExecuteNonQuery(ByVal CommandSql As String) As Boolean
     
@@ -45,28 +57,31 @@ Public Function ExecuteNonQuery(ByVal CommandSql As String) As Boolean
     
     On Error GoTo Exception
             
-        With Command
+    With Command
+                
+        .ActiveConnection = Connection
+        .CommandType = adCmdText
+        .CommandText = CommandSql
+                
+        Call .Execute(RecordsAffected)
             
-            .ActiveConnection = Connection
-            .CommandType = adCmdText
-            .CommandText = CommandSql
+    End With
             
-            Call .Execute(RecordsAffected)
-        
-        End With
-        
-        ExecuteNonQuery = RecordsAffected
-        
-        ClearParameter
-        SqlBuilder.Clear
+    Let ExecuteNonQuery = RecordsAffected
+            
+    ClearParameter
+    Sql.Clear
     
     Exit Function
     
 Exception:
-        
     Connection.RollbackTrans
     
 End Function
+
+Public Sub RollbackTrans()
+    Connection.RollbackTrans
+End Sub
 
 Public Function ExecuteScalar(ByVal SqlCommand As String) As Variant
     
@@ -81,7 +96,7 @@ Public Function ExecuteScalar(ByVal SqlCommand As String) As Variant
     End If
   
     ClearParameter
-    SqlBuilder.Clear
+    Sql.Clear
     
 End Function
 
@@ -95,15 +110,4 @@ Public Sub ClearParameter()
         DoEvents
     Wend
 End Sub
-
-Private Sub Class_Terminate()
-   
-    If Connection.State = True Then: Connection.Close
-    If RecordSet.State = True Then: RecordSet.Close
-    
-    Set Connection = Nothing: Set RecordSet = Nothing
-    Set Command = Nothing: Set SqlBuilder = Nothing
-   
-End Sub
-
 

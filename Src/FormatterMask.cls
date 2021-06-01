@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder("Frabasic")
 Option Explicit
 
 Public WithEvents ToDate As MSForms.TextBox
@@ -27,19 +28,22 @@ Public WithEvents ToOnlyNull As MSForms.TextBox
 Attribute ToOnlyNull.VB_VarHelpID = -1
 Public WithEvents ToCurrency As MSForms.TextBox
 Attribute ToCurrency.VB_VarHelpID = -1
-Public WithEvents CanNotString  As MSForms.TextBox
+Public WithEvents CanNotString As MSForms.TextBox
 Attribute CanNotString.VB_VarHelpID = -1
-Public WithEvents ToJustDotString  As MSForms.TextBox
+Public WithEvents ToJustDotString As MSForms.TextBox
 Attribute ToJustDotString.VB_VarHelpID = -1
+Public WithEvents ToPercentage As MSForms.TextBox
+Attribute ToPercentage.VB_VarHelpID = -1
 
 Private Sub CanNotString_Change()
     Dim ret As String
-    Dim i As Integer
-    For i = 1 To Len(CanNotString.Value)
-        If Asc(Mid(CanNotString.Value, i, 1)) >= 48 And Asc(Mid(CanNotString.Value, i, 1)) <= 58 Then
-            ret = ret & Mid(CanNotString.Value, i, 1)
+    Dim I As Integer
+    
+    For I = 1 To Len(CanNotString.Value)
+        If Asc(Mid(CanNotString.Value, I, 1)) >= 48 And Asc(Mid(CanNotString.Value, I, 1)) <= 58 Then
+            ret = ret & Mid(CanNotString.Value, I, 1)
         End If
-    Next i
+    Next I
     CanNotString = ret
 End Sub
 
@@ -179,17 +183,17 @@ Private Sub ToOnlyNull_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
 End Sub
 
 Private Sub ToCurrency_Change()
-    Dim i As Integer, T As String
+    Dim I As Integer, T As String
     If Not IsNumeric(ToCurrency.Value) Then ToCurrency.Value = Empty
     With ToCurrency
         T = .Text
-        i = Len(T) - .SelStart
+        I = Len(T) - .SelStart
         T = Replace(.Text, ",", "")
         If Len(T) < 3 Then T = String(3 - Len(T), "0") & T
         T = Mid(T, 1, Len(T) - 2) & "," & Mid(T, Len(T) - 1)
         T = Format(T, "R$#,##0.00")
         If .Text <> T Then .Text = T
-        .SelStart = Len(T) - i
+        .SelStart = Len(T) - I
     End With
 End Sub
 
