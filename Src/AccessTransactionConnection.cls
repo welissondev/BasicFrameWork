@@ -25,13 +25,6 @@ Private Sub Class_Initialize()
     Set Sql = New StringBuilder
 End Sub
 
-Private Sub Class_Terminate()
-    Set Connection = Nothing
-    Set RecordSet = Nothing
-    Set Command = Nothing
-    Set Sql = Nothing
-End Sub
-
 Public Function Begin() As ADODB.Connection
     
     If Connection.State <> IS_CONNECTED Then
@@ -43,12 +36,17 @@ Public Function Begin() As ADODB.Connection
 End Function
 
 Public Function Commit() As Boolean
+    
     On Error GoTo Exception
-    Connection.CommitTrans
-    Commit = True
+    
+    Call Connection.CommitTrans: Let Commit = True
+    
     Exit Function
+
 Exception:
-    Commit = False
+    
+    Let Commit = False
+
 End Function
 
 Public Function ExecuteNonQuery(ByVal CommandSql As String) As Boolean
@@ -111,3 +109,13 @@ Public Sub ClearParameter()
     Wend
 End Sub
 
+Public Property Get Field(Name As String) As Variant
+    Field = RecordSet.Fields(Name).Value
+End Property
+
+Private Sub Class_Terminate()
+    Set Connection = Nothing
+    Set RecordSet = Nothing
+    Set Command = Nothing
+    Set Sql = Nothing
+End Sub
