@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'@Folder("Frabasic.Components.ProgressBar")
+
 Option Explicit
 
 Private This As ProgressTypes
@@ -337,4 +339,5 @@ Public Property Let Height(ByVal Value As Variant)
         This.Height = Value
     End If
 End Property
+
 
